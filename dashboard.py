@@ -17,8 +17,8 @@ elif menu_option == "Visualisasi":
     st.subheader("Visualisasi Data")
     try:
         # Load the data
-        day_df = pd.read_csv("./dashboard/day.csv")
-        hour_df = pd.read_csv("./dashboard/hour.csv")
+        day_df = pd.read_csv("day.csv")
+        hour_df = pd.read_csv("hour.csv")
         
         # Filter menu
         st.write("Filter Visualisasi Data")
@@ -130,7 +130,7 @@ elif menu_option == "Analisis RFM":
     st.subheader("Analisis RFM")
     try:
         # Load the data
-        day_df = pd.read_csv("./dashboard/day.csv")
+        day_df = pd.read_csv("day.csv")
         day_df["dteday"] = pd.to_datetime(day_df["dteday"])
 
         weekday_mapping = {
