@@ -1,5 +1,8 @@
 import streamlit as st
+import numpy as np
 import pandas as pd
+import matplotlib as pt
+import seaborn as sb
 import matplotlib.pyplot as plt
 
 # Sidebar menu
@@ -16,67 +19,120 @@ elif menu_option == "Visualisasi":
     st.subheader("Visualisasi Data")
     try:
         # Load the data
-        hour_df = pd.read_csv("hour.csv")
-        day_df = pd.read_csv("day.csv")
+        day_df = pd.read_csv("./dashboard/day.csv")
+        hour_df = pd.read_csv("./dashboard/hour.csv")
+        
+        # Filter menu
+        st.write("Filter Visualisasi Data")
+        selected_season = st.selectbox(
+            "Pilih Musim untuk Visualisasi",
+            options=[1, 2, 3, 4],
+            format_func=lambda x: {1: "Musim Semi", 2: "Musim Panas", 3: "Musim Gugur", 4: "Musim Salju"}[x]
+        )
         
         # Visualisasi rata-rata penyewa per hari berdasarkan musim
-        st.write("Rata-rata Penyewa Sepeda per Hari Berdasarkan Musim")
         season_names = {1: "Musim Semi", 2: "Musim Panas", 3: "Musim Gugur", 4: "Musim Salju"}
+        st.write(f"Rata-rata Penyewa Sepeda per Hari untuk {season_names[selected_season]}")
         weekday_mapping = {
             0: "Minggu", 1: "Senin", 2: "Selasa", 3: "Rabu",
             4: "Kamis", 5: "Jumat", 6: "Sabtu"
         }
 
-        fig, axs = plt.subplots(2, 2, figsize=(10, 8))
-        fig.suptitle("Rata-rata Penyewa Sepeda per Hari Berdasarkan Musim", fontsize=16)
+        weekday_avg = day_df[day_df["season"] == selected_season] \
+            .groupby("weekday")["cnt"].mean() \
+            .rename(index=weekday_mapping)
 
-        for i, season in enumerate([1, 2, 3, 4]):
-            row, col = divmod(i, 2)
-            ax = axs[row, col]
+        fig, ax = plt.subplots(figsize=(8, 6))
+        weekday_avg.plot(kind="bar", ax=ax, color="pink", edgecolor="black")
+        ax.set_title(f"Rata-rata Penyewa Sepeda per Hari - {season_names[selected_season]}")
+        ax.set_xlabel("Hari")
+        ax.set_ylabel("Rata-rata Penyewa")
+        ax.tick_params(axis="x", rotation=0)
+        ax.grid(axis="y", linestyle="--", alpha=0.6)
 
-            weekday_avg = day_df[day_df["season"] == season] \
-                .groupby("weekday")["cnt"].mean() \
-                .rename(index=weekday_mapping)
-
-            weekday_avg.plot(kind="bar", ax=ax, color="pink", edgecolor="black")
-            ax.set_title(season_names[season])
-            ax.set_xlabel("Hari")
-            ax.set_ylabel("Rata-rata Penyewa")
-            ax.tick_params(axis="x", rotation=0)
-            ax.grid(axis="y", linestyle="--", alpha=0.6)
-
-        plt.tight_layout(rect=[0, 0, 1, 0.95])
         st.pyplot(fig)
 
         # Visualisasi rata-rata penyewa per jam berdasarkan musim
-        st.write("Rata-rata Penyewa Sepeda per Jam Berdasarkan Musim")
-        fig, axs = plt.subplots(2, 2, figsize=(15, 10))
-        fig.suptitle("Rata-rata Penyewa Sepeda per Jam Berdasarkan Musim", fontsize=16)
+        st.write(f"Rata-rata Penyewa Sepeda per Jam untuk {season_names[selected_season]}")
+        hour_avg = hour_df[hour_df["season"] == selected_season] \
+            .groupby("hr")["cnt"].mean()
 
-        for i, season in enumerate([1, 2, 3, 4]):
-            row, col = divmod(i, 2)
-            ax = axs[row, col]
+        fig, ax = plt.subplots(figsize=(8, 6))
+        hour_avg.plot(kind="bar", ax=ax, color="lightblue", edgecolor="black")
+        ax.set_title(f"Rata-rata Penyewa Sepeda per Jam - {season_names[selected_season]}")
+        ax.set_xlabel("Jam")
+        ax.set_ylabel("Rata-rata Penyewa")
+        ax.tick_params(axis="x", rotation=0)
+        ax.grid(axis="y", linestyle="--", alpha=0.6)
 
-            avg_by_hour = hour_df[hour_df["season"] == season].groupby("hr")["cnt"].mean()
-
-            avg_by_hour.plot(kind="bar", ax=ax, color="orange", edgecolor="black")
-            ax.set_title(season_names[season])
-            ax.set_xlabel("Jam")
-            ax.set_ylabel("Rata-rata Penyewa")
-            ax.grid(axis="y", linestyle="--", alpha=0.6)
-            ax.tick_params(axis="x", rotation=0)
-
-        plt.tight_layout(rect=[0, 0, 1, 0.95])
         st.pyplot(fig)
+
+        # Pertanyaan 1: Insight penyewaan sepeda
+        st.write("### Pertanyaan 1: Pada jam berapa penyewaan sepeda paling banyak dan paling rendah dalam masing-masing musim?")
+        insight = {
+            1: """
+            **Musim Semi:** 
+            - Diketahui jumlah penyewa paling sedikit pada semua musim ada pada jam 04:00 dan yang terbanyak pada jam 17:00
+            - Penyewa terbanyak pada jam 08:00, 17:00, & 18:00. Penyewa paling sedikit pada jam 00:00-04:00.
+            """,
+            2: """
+            **Musim Panas:**
+            - Diketahui jumlah penyewa paling sedikit pada semua musim ada pada jam 04:00 dan yang terbanyak pada jam 17:00
+            - Penyewa terbanyak pada jam 17:00, & 18:00. Penyewa paling sedikit pada jam 00:00-04:00.
+            """,
+            3: """
+            **Musim Gugur:** 
+            - Diketahui jumlah penyewa paling sedikit pada semua musim ada pada jam 04:00 dan yang terbanyak pada jam 17:00
+            - Penyewa terbanyak pada jam 17:00, & 18:00. Penyewa paling sedikit pada jam 01:00-04:00.
+            """,
+            4: """
+            **Musim Salju:**
+            - Diketahui jumlah penyewa paling sedikit pada semua musim ada pada jam 04:00 dan yang terbanyak pada jam 17:00
+            - Penyewa terbanyak pada jam 17:00. Penyewa paling sedikit pada jam 01:00-04:00.
+            """
+        }
+        st.write(insight[selected_season])
+
+        # Pertanyaan 2: Insight penyewaan sepeda berdasarkan musim
+        st.write("### Pertanyaan 2: Pada hari apa penyewaan sepeda paling banyak dan paling rendah dalam masing-masing musim?")
+        
+        seasonal_insight = {
+            1: """
+            **Musim Semi:**
+            - Diketahui jumlah penyewa dari 4 musim ini, bisa dilihat bahwa ramai ketika *musim panas* & *musim gugur*
+            - Jumlah penyewa paling sedikit di hari Minggu.
+            - Jumlah penyewa paling banyak di hari Kamis.
+            """,
+            2: """
+            **Musim Panas:**
+            - Diketahui jumlah penyewa dari 4 musim ini, bisa dilihat bahwa ramai ketika *musim panas* & *musim gugur*
+            - Jumlah penyewa paling sedikit di hari Senin.
+            - Jumlah penyewa paling banyak di hari Sabtu.
+            """,
+            3: """
+            **Musim Gugur:**
+            - Diketahui jumlah penyewa dari 4 musim ini, bisa dilihat bahwa ramai ketika *musim panas* & *musim gugur*
+            - Jumlah penyewa paling sedikit di hari Minggu.
+            - Jumlah penyewa paling banyak di hari Rabu.
+            """,
+            4: """
+            **Musim Salju:**
+            - Diketahui jumlah penyewa dari 4 musim ini, bisa dilihat bahwa ramai ketika *musim panas* & *musim gugur*
+            - Jumlah penyewa paling sedikit di hari Minggu.
+            - Jumlah penyewa paling banyak di hari Sabtu.
+            """
+        }
+        
+        st.markdown(seasonal_insight[selected_season])
     except FileNotFoundError:
-        st.error("File hour.csv atau day.csv tidak ditemukan. Pastikan file berada di folder dashboard.")
+        st.error("File day.csv atau hour.csv tidak ditemukan. Pastikan file berada di folder dashboard.")
 
 # Analisis RFM menu
 elif menu_option == "Analisis RFM":
     st.subheader("Analisis RFM")
     try:
         # Load the data
-        day_df = pd.read_csv("day.csv")
+        day_df = pd.read_csv("./dashboard/day.csv")
         day_df["dteday"] = pd.to_datetime(day_df["dteday"])
 
         weekday_mapping = {
