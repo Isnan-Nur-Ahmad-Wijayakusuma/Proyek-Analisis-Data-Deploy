@@ -1,7 +1,6 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-import matplotlib as pt
 import matplotlib.pyplot as plt
 
 # Sidebar menu
@@ -18,8 +17,8 @@ elif menu_option == "Visualisasi":
     st.subheader("Visualisasi Data")
     try:
         # Load the data
-        day_df = pd.read_csv("day.csv")
-        hour_df = pd.read_csv("hour.csv")
+        day_df = pd.read_csv("./dashboard/day.csv")
+        hour_df = pd.read_csv("./dashboard/hour.csv")
         
         # Filter menu
         st.write("Filter Visualisasi Data")
@@ -131,7 +130,7 @@ elif menu_option == "Analisis RFM":
     st.subheader("Analisis RFM")
     try:
         # Load the data
-        day_df = pd.read_csv("day.csv")
+        day_df = pd.read_csv("./dashboard/day.csv")
         day_df["dteday"] = pd.to_datetime(day_df["dteday"])
 
         weekday_mapping = {
@@ -203,5 +202,13 @@ elif menu_option == "Analisis RFM":
 
         st.write("Detail RFM per Hari - Registered:")
         st.dataframe(rfm_registered.round(2))
+        # Penjelasan tambahan
+        st.markdown("""
+        ### Penjelasan RFM
+        Pengelompokan jumlah penyewa berdasarkan analisis RFM menunjukkan bahwa **penyewa yang terdaftar dalam sistem (registered)** 
+        memiliki frekuensi penyewaan yang jauh lebih tinggi dan nilai penyewaan (monetary) yang lebih besar dibandingkan dengan **penyewa casual**.
+
+        Dari analisis ini, dapat disimpulkan bahwa pengguna yang terdaftar lebih konsisten dalam melakukan penyewaan sepeda dibandingkan dengan pengguna casual.
+        """)
     except FileNotFoundError:
         st.error("File day.csv tidak ditemukan. Pastikan file berada di folder dashboard.")
