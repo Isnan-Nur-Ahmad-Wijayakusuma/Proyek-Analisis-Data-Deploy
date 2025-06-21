@@ -2,7 +2,6 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import matplotlib as pt
-import seaborn as sb
 import matplotlib.pyplot as plt
 
 # Sidebar menu
